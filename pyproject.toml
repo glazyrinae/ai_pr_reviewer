@@ -1,0 +1,68 @@
+[project]
+name = "ai-pr-reviewer"
+version = "0.1.0"
+description = "Сервис ревью пул-реквестов моделью"
+requires-python = ">=3.12"
+# Рантайм-зависимости живут в deploy/requirements.txt: их ставит образ.
+# Здесь — только конфигурация проверок и инструменты разработчика.
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "ruff==0.16.6",
+    "mypy==2.3.1",
+]
+
+[tool.uv]
+# Пакет не собираем и не устанавливаем: это приложение, а не библиотека,
+# поэтому build-backend не нужен.
+package = false
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+src = ["app"]
+extend-exclude = [".venv"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "N",        # pep8-naming
+    "UP",       # pyupgrade
+    "B",        # bugbear
+    "C4",       # comprehensions
+    "SIM",      # simplify
+    "BLE",      # никаких голых except
+    "T20",      # print в проде — это лог мимо логгера
+    "TID",      # flake8-tidy-imports
+    "RUF",
+]
+ignore = [
+    # Комментарии и docstring'и на русском: кириллица рядом с латиницей — норма.
+    "RUF001",
+    "RUF002",
+    "RUF003",
+    # Depends()/Field() в аргументах по умолчанию — идиома FastAPI.
+    "B008",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"__future__.annotations".msg = "Аннотации не откладываем: нужна forward-ref — ставь кавычки."
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.12"
+files = ["app"]
+ignore_missing_imports = true
+disallow_untyped_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unreachable = true
+no_implicit_optional = true

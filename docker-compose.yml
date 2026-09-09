@@ -1,0 +1,23 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+      network: host
+    image: ai-pr-reviewer
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    user: "${UID:-1000}:${GID:-1000}"
+    env_file:
+      - path: .env
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - .:/app
+    restart: unless-stopped
+
+# ВРЕМЕННО: то же самое для рантайма — контейнер наследует MTU моста, а не VPN.
+networks:
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1376
