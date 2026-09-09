@@ -4,7 +4,8 @@ from pydantic import BaseModel, Field
 
 
 class HealthResponse(BaseModel):
-    status: Literal["ok"] = Field(description="Процесс отвечает")
+    api_status: Literal["ok"] = Field(description="Процесс отвечает")
+    llm_status: str = Field(description="Ответ от LLM")
     service: str = Field(description="Имя сервиса из конфига")
-    version: str= Field(description="Версия сервиса")
+    version: str = Field(description="Версия сервиса")
     debug: bool = Field(description="Режим отладки")

@@ -1,11 +1,6 @@
-"""Конфигурация сервиса: TOML как основной источник, переменные окружения — поверх него.
+from pathlib import Path
 
-Окружение стоит перед файлом намеренно: config.toml лежит в репозитории и монтируется
-в контейнер, поэтому всё, что зависит от стенда, переопределяется переменными вида
-APP__ENVIRONMENT (двойное подчёркивание = вложенность).
-"""
-
-from pydantic import BaseModel
+from pydantic import BaseModel, SecretStr
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -15,21 +10,28 @@ from pydantic_settings import (
 
 
 class AppSettings(BaseModel):
-    """Параметры самого процесса: как называемся и сколько логируем."""
-
     title: str = "AI PR Reviewer"
     version: str = "0.1.0"
+    debug: bool = False
+    log_level: str = "INFO"
+
+
+class LLMSettings(BaseModel):
+    base_url: str = ""
+    api_key: SecretStr = SecretStr("")
+    model: str = ""
+    timeout: int = 60
 
 
 class Config(BaseSettings):
-    """Корень конфигурации: секции повторяют config.toml один в один."""
-
     model_config = SettingsConfigDict(
-        toml_file="config/settings/config.toml",
+        toml_file=Path(__file__).parent / "settings" / "config.toml",
+        env_nested_delimiter="__",
         extra="ignore",
     )
 
     app: AppSettings = AppSettings()
+    llm: LLMSettings = LLMSettings()
 
     @classmethod
     def load(cls) -> "Config":
@@ -44,9 +46,7 @@ class Config(BaseSettings):
         dotenv_settings: PydanticBaseSettingsSource,
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> tuple[PydanticBaseSettingsSource, ...]:
-        return (
-            TomlConfigSettingsSource(settings_cls),
-        )
+        return (env_settings, TomlConfigSettingsSource(settings_cls))
 
 
 config = Config.load()

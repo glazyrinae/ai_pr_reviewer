@@ -2,8 +2,8 @@ import logging
 
 from fastapi import FastAPI
 
-from app.api import router
-from app.config import config
+from app.api.endpoints import router
+from app.config.main import config
 
 
 def create_app() -> FastAPI:

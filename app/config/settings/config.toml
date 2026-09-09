@@ -3,3 +3,8 @@ title = "AI PR Reviewer"
 version = "0.1.0"
 debug = true
 log_level = "INFO"
+
+[llm]
+base_url = "https://speshu.ai/api/v1"
+model = "qwen/qwen3.5-flash-02-23"
+timeout = 60
